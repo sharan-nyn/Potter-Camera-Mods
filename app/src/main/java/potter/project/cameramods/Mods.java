@@ -5,18 +5,15 @@ package potter.project.cameramods;
  */
 
 public class Mods {
-    private String name,desc;
-    public Mods(String name, String desc)
-    {
-        this.setName(name);
-        this.setDesc(desc);
-    }
-    public String getName() {
-        return name;
+    private String title;
+    private String desc;
+
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getDesc() {
