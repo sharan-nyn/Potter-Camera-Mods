@@ -27,6 +27,7 @@ public class ModsJSONParser {
 
                 mods.setTitle(obj.getString("title"));
                 mods.setDesc(obj.getString("desc"));
+                mods.setId(obj.getInt("id"));
 
                 modsList.add(mods);
             }

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
@@ -24,7 +25,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
     List<Mods> modsList;
     ListView lv;
     String uri = "https://api.jsonbin.io/b/5a94580c859c4e1c4d5d7f29";
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
        lv = (ListView) findViewById(R.id.listView);
        requestData(uri);
+       lv.setOnItemClickListener(this);
     }
 
     public void requestData(String uri)
@@ -45,16 +47,6 @@ public class MainActivity extends AppCompatActivity {
                 modsList = ModsJSONParser.parseData(response);
                 ModsAdapter adapter = new ModsAdapter(MainActivity.this,modsList);
                 lv.setAdapter(adapter);
-                lv.setOnClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        if(i == 0)
-                        {
-                            Intent myIntent = new Intent(view.getContext(),SingleModActivity.class);
-                            startActivityForResult(myIntent);
-                        }
-                    }
-                });
             }
         }, new Response.ErrorListener() {
             @Override
@@ -64,5 +56,13 @@ public class MainActivity extends AppCompatActivity {
         });
         RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(request);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        Mods clickedMod = (Mods) adapterView.getItemAtPosition(i);
+        Toast.makeText(MainActivity.this,
+                "Clicked item:\n" +
+                        clickedMod.getId(),Toast.LENGTH_LONG).show();
     }
 }
