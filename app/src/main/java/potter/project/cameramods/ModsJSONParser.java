@@ -13,20 +13,20 @@ import java.util.List;
 
 public class ModsJSONParser {
     static List<Mods> modsList;
-    public static List<Mods> parseData(String content)
+    public static List<Mods> parseData(JSONObject content)
     {
         JSONArray mods_array = null;
         Mods mods = null;
         try {
-            mods_array = new JSONArray(content);
+            mods_array = content.getJSONArray("data");
             modsList = new ArrayList<>();
             for (int i = 0; i<mods_array.length();i++)
             {
                 JSONObject obj = mods_array.getJSONObject(i);
                 mods = new Mods();
 
-                mods.setTitle(obj.getString("title"));
-                mods.setDesc(obj.getString("desc"));
+                mods.setTitle(obj.getString("name"));
+                mods.setDesc(obj.getString("description"));
                 mods.setId(obj.getInt("id"));
 
                 modsList.add(mods);

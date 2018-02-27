@@ -28,7 +28,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
     List<Mods> modsList;
     ListView lv;
-    String uri = "https://api.jsonbin.io/b/5a94580c859c4e1c4d5d7f29";
+    String uri = "http://pottercameramods.000webhostapp.com/server.php?t=list";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,9 +41,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     public void requestData(String uri)
     {
-        StringRequest request = new StringRequest(uri, new Response.Listener<String>() {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, uri, null, new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(String response) {
+            public void onResponse(JSONObject response) {
                 modsList = ModsJSONParser.parseData(response);
                 ModsAdapter adapter = new ModsAdapter(MainActivity.this,modsList);
                 lv.setAdapter(adapter);
