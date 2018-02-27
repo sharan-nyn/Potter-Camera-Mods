@@ -76,9 +76,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Mods clickedMod = (Mods) adapterView.getItemAtPosition(i);
         int id = clickedMod.getId();
         Intent intent = new Intent(getBaseContext(),SingleItemActivity.class);
-        intent.putExtra("EXTRTA_ID",id);
-        Toast.makeText(MainActivity.this,
-                "Clicked item:" + id,Toast.LENGTH_LONG).show();
+        intent.putExtra("EXTRA_ID",id);
         startActivity(intent);
     }
 }
