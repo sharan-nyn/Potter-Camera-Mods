@@ -23,22 +23,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
     public static List<Mods> modsList;
     ListView lv;
     TextView err;
-    Button refreshbutton;
+    Button refreshButton;
     String url = "http://pottercameramods.000webhostapp.com/server.php?t=list";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
        err = findViewById(R.id.error);
-       refreshbutton = findViewById(R.id.refresh);
+       refreshButton = findViewById(R.id.refresh);
        lv = findViewById(R.id.listView);
-        refreshbutton.setOnClickListener(new View.OnClickListener() {
+        refreshButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 requestData(url);
@@ -54,8 +55,27 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onResponse(JSONObject response) {
                 err.setVisibility(View.INVISIBLE);
-                refreshbutton.setVisibility(View.INVISIBLE);
-                modsList = ModsJSONParser.parseData(response);
+                refreshButton.setVisibility(View.INVISIBLE);
+                JSONArray mods_array;
+                Mods mods;
+                try {
+                    mods_array = response.getJSONArray("data");
+                    modsList = new ArrayList<>();
+                    for (int i = 0; i<mods_array.length();i++)
+                    {
+                        JSONObject obj = mods_array.getJSONObject(i);
+                        mods = new Mods();
+
+                        mods.setTitle(obj.getString("name"));
+                        mods.setDesc(obj.getString("description"));
+                        mods.setId(obj.getInt("id"));
+
+                        modsList.add(mods);
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 ModsAdapter adapter = new ModsAdapter(MainActivity.this,modsList);
                 lv.setAdapter(adapter);
             }
@@ -63,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onErrorResponse(VolleyError error) {
                 err.setVisibility(View.VISIBLE);
-                refreshbutton.setVisibility(View.VISIBLE);
+                refreshButton.setVisibility(View.VISIBLE);
                 err.setText("Error can't connect to online database.\n\nCheck internet connection. Click the refresh button to try again.\nWebsite could be sleeping. Try again in 1 hour");
             }
         });
