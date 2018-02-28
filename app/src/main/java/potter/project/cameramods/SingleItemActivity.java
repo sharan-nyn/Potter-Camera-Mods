@@ -44,9 +44,9 @@ public class SingleItemActivity extends AppCompatActivity {
                         JSONObject mods = response.getJSONObject("data");
                         itemTitle.setText(mods.getString("name"));
                         itemDesc.setText(mods.getString("description"));
-                        itemAuthor.setText(mods.getString("author"));
-                        itemDate.setText(mods.getString("udate"));
-                        itemDownloads.setText(mods.getString("downloads"));
+                        itemAuthor.setText("Author: "+mods.getString("author"));
+                        itemDate.setText("Last Update: "+mods.getString("udate"));
+                        itemDownloads.setText("Downloads: "+mods.getString("downloads"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

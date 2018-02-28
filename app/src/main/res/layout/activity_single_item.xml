@@ -9,7 +9,7 @@
 
     <TextView
         android:id="@+id/title_s"
-        android:text="No info provided"
+        android:text="Loading..."
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"
@@ -20,7 +20,7 @@
         android:id="@+id/author"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No info provided"
+        android:text="Loading..."
         android:layout_below="@id/title_s"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@android:color/tertiary_text_dark"
@@ -32,7 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:text="No info provided"
+        android:text="Loading..."
         android:layout_below="@id/author"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textIsSelectable="false" />
@@ -42,7 +42,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/description_s"
-        android:text="No info provided"
+        android:text="Loading..."
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@android:color/tertiary_text_dark"
         android:textIsSelectable="false"
@@ -50,7 +50,7 @@
 
     <TextView
         android:id="@+id/update_time"
-        android:text="No info provided"
+        android:text="Loading..."
         android:layout_below="@id/downloads"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
