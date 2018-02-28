@@ -41,8 +41,7 @@ public class SingleItemActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(JSONObject response) {
                     try {
-                        JSONArray jsonArray = response.getJSONArray("data");
-                        JSONObject mods = jsonArray.getJSONObject(0);
+                        JSONObject mods = response.getJSONObject("data");
                         itemTitle.setText(mods.getString("name"));
                         itemDesc.setText(mods.getString("description"));
                         itemAuthor.setText(mods.getString("author"));
