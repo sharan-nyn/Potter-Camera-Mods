@@ -1,90 +1,71 @@
 package potter.project.cameramods;
 
 import android.content.Intent;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
-    public static List<Mods> modsList;
     ListView lv;
     TextView err;
-    Button refreshButton;
+    SwipeRefreshLayout swipe;
     String url = "http://pottercameramods.000webhostapp.com/server.php?t=list";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-       err = findViewById(R.id.error);
-       refreshButton = findViewById(R.id.refresh);
-       lv = findViewById(R.id.listView);
-        refreshButton.setOnClickListener(new View.OnClickListener() {
+        err = findViewById(R.id.error);
+        swipe = findViewById(R.id.swiperefresh);
+        swipe.setEnabled(true);
+        swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
-            public void onClick(View view) {
+            public void onRefresh() {
                 requestData(url);
             }
         });
-       requestData(url);
-       lv.setOnItemClickListener(this);
+        lv = findViewById(R.id.listView);
+        lv.setOnItemClickListener(this);
+        requestData(url);
     }
 
-    public void requestData(String url)
-    {
+    public void requestData(String url) {
+        err.setVisibility(View.INVISIBLE);
+        lv.setVisibility(View.VISIBLE);
+        swipe.setRefreshing(true);
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                err.setVisibility(View.INVISIBLE);
-                refreshButton.setVisibility(View.INVISIBLE);
-                JSONArray mods_array;
-                Mods mods;
                 try {
-                    mods_array = response.getJSONArray("data");
-                    modsList = new ArrayList<>();
-                    for (int i = 0; i<mods_array.length();i++)
-                    {
-                        JSONObject obj = mods_array.getJSONObject(i);
-                        mods = new Mods();
-
-                        mods.setTitle(obj.getString("name"));
-                        mods.setDesc(obj.getString("description"));
-                        mods.setId(obj.getInt("id"));
-
-                        modsList.add(mods);
-                    }
-
+                    ModsAdapter adapter = new ModsAdapter(MainActivity.this,response.getJSONArray("data"));
+                    lv.setAdapter(adapter);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                ModsAdapter adapter = new ModsAdapter(MainActivity.this,modsList);
-                lv.setAdapter(adapter);
+                swipe.setRefreshing(false);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 err.setVisibility(View.VISIBLE);
-                refreshButton.setVisibility(View.VISIBLE);
-                err.setText("Error can't connect to online database.\n\nCheck internet connection. Click the refresh button to try again.\nWebsite could be sleeping. Try again in 1 hour");
+                lv.setVisibility(View.INVISIBLE);
+                err.setText("Error can't connect to online database.\n\nCheck internet connection.\n Pull down to try again.\nWebsite could be sleeping. Try again in 1 hour");
+                swipe.setRefreshing(false);
             }
         });
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -93,10 +74,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        Mods clickedMod = (Mods) adapterView.getItemAtPosition(i);
-        int id = clickedMod.getId();
-        Intent intent = new Intent(getBaseContext(),SingleItemActivity.class);
-        intent.putExtra("EXTRA_ID",id);
-        startActivity(intent);
+        try {
+            Intent intent = new Intent(getBaseContext(), SingleItemActivity.class);
+            intent.putExtra("EXTRA_ID", ((JSONObject) adapterView.getItemAtPosition(i)).getInt("id"));
+            startActivity(intent);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

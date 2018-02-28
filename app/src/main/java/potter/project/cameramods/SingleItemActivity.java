@@ -2,11 +2,8 @@ package potter.project.cameramods;
 
 import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Environment;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -33,38 +30,33 @@ import java.io.FileOutputStream;
 
 public class SingleItemActivity extends AppCompatActivity {
     private RequestQueue mQueue;
-    int extraId;
     Button downloadButton;
     private TextView itemDesc,itemTitle,itemAuthor,itemDate,itemDownloads;
-    String urlD;
     String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
     private final static int REQUEST_CODE = 1010;
     ProgressDialog progressDialog;
+    int modid;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_item);
-        extraId = getIntent().getIntExtra("EXTRA_ID",0);
-
-        urlD = "http://pottercameramods.000webhostapp.com/server.php?t=download&id="+extraId;
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Please wait...");
         progressDialog.setMessage("downloading.....");
         progressDialog.setCancelable(false);
         downloadButton = findViewById(R.id.button_download);
-
         downloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {checkPerms();}
         });
-
         itemDesc = findViewById(R.id.description_s);
         itemTitle = findViewById(R.id.title_s);
         itemAuthor = findViewById(R.id.author);
         itemDate = findViewById(R.id.update_time);
         itemDownloads = findViewById(R.id.downloads);
         mQueue = Volley.newRequestQueue(this);
-        jsonParse();
+        modid = getIntent().getIntExtra("EXTRA_ID",0);
+        jsonParse("http://pottercameramods.000webhostapp.com/server.php?t=details&id="+modid);
     }
     private void checkPerms() {
         if (ActivityCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -73,16 +65,16 @@ public class SingleItemActivity extends AppCompatActivity {
         downloadFile();
     }
     private void downloadFile() {
-        InputStreamVolleyRequest request = new InputStreamVolleyRequest(Request.Method.GET, urlD,
+        InputStreamVolleyRequest request = new InputStreamVolleyRequest(Request.Method.GET,
+                "http://pottercameramods.000webhostapp.com/server.php?t=download&id="+modid,
                 new Response.Listener<byte[]>() {
                     @Override
                     public void onResponse(byte[] response) {
                         progressDialog.dismiss();
-
                         // TODO handle the response
                         try {
                             if (response!=null) {
-                                String name="Mod_"+extraId+".zip";
+                                String name="Mod_"+modid+".zip";
                                 File dir = new File (Environment.getExternalStorageDirectory().getAbsolutePath() + "/PotterCameraMods/");
                                 dir.mkdirs();
                                 File videoFile = new File(dir.getAbsoluteFile()+"/"+name);
@@ -113,8 +105,7 @@ public class SingleItemActivity extends AppCompatActivity {
         progressDialog.show();
     }
 
-    private void jsonParse(){
-            String url = "http://pottercameramods.000webhostapp.com/server.php?t=details&id="+extraId;
+    private void jsonParse(String url){
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
@@ -123,8 +114,10 @@ public class SingleItemActivity extends AppCompatActivity {
                         itemTitle.setText(mods.getString("name"));
                         itemDesc.setText(mods.getString("description"));
                         itemAuthor.setText("Author: "+mods.getString("author"));
-                        itemDate.setText("Last Update: "+mods.getString("udate"));
+                        itemDate.setText("Last Updated: "+mods.getString("udate"));
                         itemDownloads.setText("Downloads: "+mods.getString("downloads"));
+                        findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
+                        findViewById(R.id.details).setVisibility(View.VISIBLE);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -135,8 +128,6 @@ public class SingleItemActivity extends AppCompatActivity {
                     error.printStackTrace();
                 }
             });
-
-
             mQueue.add(request);
         }
 }

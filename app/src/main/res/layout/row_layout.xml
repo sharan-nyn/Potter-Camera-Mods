@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent"
-    android:padding="10dp">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp">
 
     <TextView
         android:id="@+id/title"
@@ -23,6 +24,8 @@
         android:layout_alignParentBottom="true"
         android:layout_below="@id/title"
         android:layout_gravity="center_vertical"
+        android:paddingTop="4dp"
+        android:singleLine="true"
         android:text="Descriptions sadas asdasdasdasdasdasdasdasddasdasdasd"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textIsSelectable="false" />

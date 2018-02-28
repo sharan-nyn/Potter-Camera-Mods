@@ -19,7 +19,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SingleItemActivity"></activity>
+        <activity android:name=".SingleItemActivity" android:label="Mod Info"></activity>
     </application>
 
 </manifest>

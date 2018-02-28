@@ -10,6 +10,9 @@ import android.widget.TextView;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.List;
 
 /**
@@ -18,13 +21,13 @@ import java.util.List;
 
 public class ModsAdapter extends BaseAdapter {
     private Context context;
-    private List<Mods> modsList;
+    private JSONArray list;
     private LayoutInflater inflater = null ;
     private RequestQueue queue;
-    public ModsAdapter(Context context,List <Mods> list)
+    public ModsAdapter(Context context,JSONArray list)
     {
         this.context = context;
-        this.modsList = list;
+        this.list = list;
         inflater = LayoutInflater.from(context);
         queue = Volley.newRequestQueue(context);
     }
@@ -35,12 +38,16 @@ public class ModsAdapter extends BaseAdapter {
     }
     @Override
     public int getCount() {
-        return modsList.size();
+        return list.length();
     }
 
     @Override
     public Object getItem(int i) {
-        return modsList.get(i);
+        try {
+            return list.get(i);
+        }catch (Exception e) {
+            return null;
+        }
     }
 
     @Override
@@ -50,21 +57,23 @@ public class ModsAdapter extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        final Mods mods = modsList.get(i);
-        final ViewHolder holder;
-        if(view == null)
-        {
-            view = inflater.inflate(R.layout.row_layout,null);
-            holder = new ViewHolder();
-            holder._title = (TextView) view.findViewById(R.id.title);
-            holder._desc = (TextView) view.findViewById(R.id.description);
-            view.setTag(holder);
+        try {
+            JSONObject item = list.getJSONObject(i);
+            final ViewHolder holder;
+            if (view == null) {
+                view = inflater.inflate(R.layout.row_layout, null);
+                holder = new ViewHolder();
+                holder._title = view.findViewById(R.id.title);
+                holder._desc = view.findViewById(R.id.description);
+                view.setTag(holder);
+            } else {
+                holder = (ViewHolder) view.getTag();
+            }
+            holder._title.setText(item.getString("name"));
+            holder._desc.setText(item.getString("description"));
+            return view;
+        }catch (Exception e){
+            return null;
         }
-        else {
-            holder = (ViewHolder) view.getTag();
-        }
-        holder._title.setText(mods.getTitle().toString());
-        holder._desc.setText(mods.getDesc().toString());
-        return view;
     }
 }
