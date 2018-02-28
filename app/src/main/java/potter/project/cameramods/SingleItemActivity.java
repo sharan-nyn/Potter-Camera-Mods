@@ -2,9 +2,12 @@ package potter.project.cameramods;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
+import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,21 +24,28 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.DexterError;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.PermissionRequestErrorListener;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.List;
 
 
 public class SingleItemActivity extends AppCompatActivity {
     private RequestQueue mQueue;
     Button downloadButton;
     private TextView itemDesc,itemTitle,itemAuthor,itemDate,itemDownloads;
-    String WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
-    private final static int REQUEST_CODE = 1010;
     ProgressDialog progressDialog;
-    int modid;
+    int modID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +57,7 @@ public class SingleItemActivity extends AppCompatActivity {
         downloadButton = findViewById(R.id.button_download);
         downloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {checkPerms();}
+            public void onClick(View view) {requestStoragePermissions();}
         });
         itemDesc = findViewById(R.id.description_s);
         itemTitle = findViewById(R.id.title_s);
@@ -55,18 +65,51 @@ public class SingleItemActivity extends AppCompatActivity {
         itemDate = findViewById(R.id.update_time);
         itemDownloads = findViewById(R.id.downloads);
         mQueue = Volley.newRequestQueue(this);
-        modid = getIntent().getIntExtra("EXTRA_ID",0);
-        jsonParse("http://pottercameramods.000webhostapp.com/server.php?t=details&id="+modid);
+        modID = getIntent().getIntExtra("EXTRA_ID",0);
+        jsonParse("http://pottercameramods.000webhostapp.com/server.php?t=details&id="+modID);
     }
-    private void checkPerms() {
-        if (ActivityCompat.checkSelfPermission(this, WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
+    public class ChangePerms implements View.OnClickListener{
+        @Override
+        public void onClick(View v) {
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            Uri uri = Uri.fromParts("package", getPackageName(), null);
+            intent.setData(uri);
+            startActivityForResult(intent, 101);
         }
-        downloadFile();
+    }
+    private void requestStoragePermissions() {
+        Dexter.withActivity(this)
+                .withPermissions(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport report) {
+                        if (report.areAllPermissionsGranted()) {downloadFile();}
+                        if (report.isAnyPermissionPermanentlyDenied()) {
+                            Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout), "Storage Permissions Denied", Snackbar.LENGTH_SHORT);
+                            mySnackbar.setAction("Change Settings", new ChangePerms());
+                            mySnackbar.show();
+                        }
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                        token.continuePermissionRequest();
+                    }
+                }).
+                withErrorListener(new PermissionRequestErrorListener() {
+                    @Override
+                    public void onError(DexterError error) {
+                        Toast.makeText(getApplicationContext(), "Error occurred! ", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .onSameThread()
+                .check();
     }
     private void downloadFile() {
         InputStreamVolleyRequest request = new InputStreamVolleyRequest(Request.Method.GET,
-                "http://pottercameramods.000webhostapp.com/server.php?t=download&id="+modid,
+                "http://pottercameramods.000webhostapp.com/server.php?t=download&id="+modID,
                 new Response.Listener<byte[]>() {
                     @Override
                     public void onResponse(byte[] response) {
@@ -74,11 +117,11 @@ public class SingleItemActivity extends AppCompatActivity {
                         // TODO handle the response
                         try {
                             if (response!=null) {
-                                String name="Mod_"+modid+".zip";
+                                String name="Mod_"+modID+".zip";
                                 File dir = new File (Environment.getExternalStorageDirectory().getAbsolutePath() + "/PotterCameraMods/");
                                 dir.mkdirs();
-                                File videoFile = new File(dir.getAbsoluteFile()+"/"+name);
-                                FileOutputStream stream = new FileOutputStream(videoFile);
+                                File modFile = new File(dir.getAbsoluteFile()+"/"+name);
+                                FileOutputStream stream = new FileOutputStream(modFile);
                                 try {
                                     stream.write(response);
                                 } finally {
